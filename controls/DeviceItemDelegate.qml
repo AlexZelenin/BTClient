@@ -87,7 +87,7 @@ Component {
             anchors.fill: parent
 
             onClicked: {
-                console.log("Cliked: ", address)
+                console.log("Cliсked: ", address)
                 controller.pushData(address)
             }
         }
