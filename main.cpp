@@ -3,6 +3,7 @@
 #include <QQmlContext>
 
 #include "bluetoothcontroller.h"
+#include "devicemodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,10 +13,15 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     BluetoothController controller;
+    DeviceModel model;
+
+    QObject::connect(&controller, SIGNAL(addDevice(QBluetoothDeviceInfo)),
+                     &model, SLOT(addDevice(QBluetoothDeviceInfo)));
 
     QQmlApplicationEngine engine;
 
     engine.rootContext()->setContextProperty("controller", &controller);
+    engine.rootContext()->setContextProperty("devicemodel", &model);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

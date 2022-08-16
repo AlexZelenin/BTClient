@@ -9,11 +9,10 @@ Item {
     RowLayout{
         anchors.fill: parent
 
-        Rectangle {
+        Item {
             id: left_item
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: "green"
 
             CButton {
                 id: btn_scan
@@ -27,11 +26,27 @@ Item {
             }
         }
 
-        Rectangle {
-            id: right_item
-            Layout.fillWidth: true
+        ListView {
+            id: table
+
             Layout.fillHeight: true
-            color: "grey"
+            Layout.fillWidth: true
+            Layout.margins: 1
+            spacing: 1
+            clip: false
+
+            headerPositioning: ListView.OverlayHeader
+
+            function size() {
+                return table.count
+            }
+
+            model: devicemodel
+            delegate: DeviceItemDelegate {}
+
+            highlight: highlight
+            highlightFollowsCurrentItem: false
+            focus: true
         }
     }
 

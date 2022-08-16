@@ -2,7 +2,7 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>controls/CButton.qml</file>
-        <file>controls/VLine.qml</file>
         <file>controls/MainView.qml</file>
+        <file>controls/DeviceItemDelegate.qml</file>
     </qresource>
 </RCC>
