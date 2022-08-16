@@ -7,24 +7,55 @@ Item {
     id: main_view
 
     RowLayout{
+        id: layout
         anchors.fill: parent
+        anchors.margins: 20
 
         Item {
-            id: left_item
+            id: item
+            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            CButton {
-                id: btn_scan
-                width: 250
-                height: 35
-                btnText: "Поиск устройств"
 
-                clicked: () => {
-                             controller.startScanDevices();
-                         }
+            Column {
+                spacing: 10
+                CButton {
+                    id: btn_scan
+
+                    width: item.width
+                    height: 35
+
+                    btnText: "Поиск устройств"
+
+                    clicked: () => {
+                                 controller.startScanDevices();
+                             }
+                }
+                CButton {
+                    id: btn_scan2
+
+                    width: item.width
+                    height: 35
+
+                    btnText: "Очистить"
+
+                    clicked: () => {
+                                 devicemodel.clear()
+                             }
+                }
             }
         }
+
+        Component {
+             id: highlight
+             Rectangle {
+                 width: table.width;
+                 height: table.height
+                 color: "lightsteelblue"; radius: 5
+             }
+         }
 
         ListView {
             id: table

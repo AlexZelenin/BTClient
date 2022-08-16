@@ -85,6 +85,14 @@ Component {
         MouseArea {
             id: ma_area
             anchors.fill: parent
+            hoverEnabled: true
+            onEntered: {
+                item_style.border.color = qsTr("#1CAC78")
+            }
+
+            onExited: {
+                item_style.border.color = "gray"
+            }
 
             onClicked: {
                 console.log("Cliked: ", address)

@@ -9,6 +9,13 @@ DeviceModel::DeviceModel(QObject* parent)
 {
 }
 
+void DeviceModel::clear()
+{
+    beginResetModel();
+    m_devices.clear();
+    endResetModel();
+}
+
 int DeviceModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
@@ -33,7 +40,7 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> DeviceModel::roleNames() const
 {
-    QHash<int , QByteArray> roleNames;
+    QHash<int, QByteArray> roleNames;
 
     roleNames[Address] = "address";
     roleNames[DeviceName] = "device_name";

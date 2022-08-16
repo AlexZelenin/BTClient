@@ -19,8 +19,8 @@ public:
 
     explicit DeviceModel(QObject* parent = nullptr);
 
+    Q_INVOKABLE void clear();
 
-    // QAbstractItemModel interface
 public:
     int rowCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
