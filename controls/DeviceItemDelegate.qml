@@ -6,7 +6,7 @@ Component {
     id: item_delegate
     Rectangle {
         id: item_style
-        implicitHeight: 70
+        implicitHeight: 150
         implicitWidth: table.width
 
         border.width: 4
@@ -82,9 +82,36 @@ Component {
             }
         }
 
+        Item {
+            anchors {
+                left: count.right
+                right: item_style.right
+                bottom: item_style.bottom
+                top: devices.bottom
+            }
+
+            CButton {
+                anchors.fill: parent
+                width: 100
+                height: 35
+                btnText: "Прикрепить файл"
+                clicked: () => {
+                             controller.attachFile();
+                         }
+            }
+        }
+
         MouseArea {
             id: ma_area
             anchors.fill: parent
+            hoverEnabled: true
+            onEntered: {
+                item_style.border.color = qsTr("#1CAC78")
+            }
+
+            onExited: {
+                item_style.border.color = "gray"
+            }
 
             onClicked: {
                 console.log("Cliсked: ", address)

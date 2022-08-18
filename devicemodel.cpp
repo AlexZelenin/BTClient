@@ -9,6 +9,13 @@ DeviceModel::DeviceModel(QObject* parent)
 {
 }
 
+void DeviceModel::clear()
+{
+    beginResetModel();
+    m_devices.clear();
+    endResetModel();
+}
+
 int DeviceModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
@@ -33,7 +40,7 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> DeviceModel::roleNames() const
 {
-    QHash<int , QByteArray> roleNames;
+    QHash<int, QByteArray> roleNames;
 
     roleNames[Address] = "address";
     roleNames[DeviceName] = "device_name";
@@ -43,7 +50,16 @@ QHash<int, QByteArray> DeviceModel::roleNames() const
 
 void DeviceModel::addDevice(const QBluetoothDeviceInfo &info)
 {
-    beginInsertRows(QModelIndex(), m_devices.size(), m_devices.size());
-    m_devices.append(info);
-    endInsertRows();
+    bool contains = false;
+
+    foreach(const QBluetoothDeviceInfo &device, m_devices) {
+        if (device.address().toString() == info.address().toString())
+            contains = true;
+    }
+
+    if (!contains) {
+        beginInsertRows(QModelIndex(), m_devices.size(), m_devices.size());
+        m_devices.append(info);
+        endInsertRows();
+    }
 }

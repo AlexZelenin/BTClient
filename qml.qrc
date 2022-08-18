@@ -4,5 +4,6 @@
         <file>controls/CButton.qml</file>
         <file>controls/MainView.qml</file>
         <file>controls/DeviceItemDelegate.qml</file>
+        <file>controls/DeviceItem.qml</file>
     </qresource>
 </RCC>
