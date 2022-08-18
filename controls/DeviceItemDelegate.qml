@@ -6,7 +6,7 @@ Component {
     id: item_delegate
     Rectangle {
         id: item_style
-        implicitHeight: 70
+        implicitHeight: 150
         implicitWidth: table.width
 
         border.width: 4
@@ -79,6 +79,25 @@ Component {
                     text: qsTr("<b>Address:</b> ") + address
                 }
 
+            }
+        }
+
+        Item {
+            anchors {
+                left: count.right
+                right: item_style.right
+                bottom: item_style.bottom
+                top: devices.bottom
+            }
+
+            CButton {
+                anchors.fill: parent
+                width: 100
+                height: 35
+                btnText: "Прикрепить файл"
+                clicked: () => {
+                             controller.attachFile();
+                         }
             }
         }
 

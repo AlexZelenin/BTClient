@@ -34,7 +34,7 @@ Item {
                              }
                 }
                 CButton {
-                    id: btn_scan2
+                    id: btn_clear
 
                     width: item.width
                     height: 35
@@ -43,6 +43,19 @@ Item {
 
                     clicked: () => {
                                  devicemodel.clear()
+                             }
+                }
+
+                CButton {
+                    id: btn_scanStop
+
+                    width: item.width
+                    height: 35
+
+                    btnText: "Остановить поиск"
+
+                    clicked: () => {
+                                 controller.stopScanDevices()
                              }
                 }
             }
@@ -73,7 +86,7 @@ Item {
             }
 
             model: devicemodel
-            delegate: DeviceItemDelegate {}
+            delegate: DeviceItem {}
 
             highlight: highlight
             highlightFollowsCurrentItem: false

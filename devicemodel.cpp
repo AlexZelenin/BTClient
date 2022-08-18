@@ -50,7 +50,6 @@ QHash<int, QByteArray> DeviceModel::roleNames() const
 
 void DeviceModel::addDevice(const QBluetoothDeviceInfo &info)
 {
-    beginInsertRows(QModelIndex(), m_devices.size(), m_devices.size());
     bool contains = false;
 
     foreach(const QBluetoothDeviceInfo &device, m_devices) {
@@ -58,7 +57,9 @@ void DeviceModel::addDevice(const QBluetoothDeviceInfo &info)
             contains = true;
     }
 
-    if (!contains)
+    if (!contains) {
+        beginInsertRows(QModelIndex(), m_devices.size(), m_devices.size());
         m_devices.append(info);
-    endInsertRows();
+        endInsertRows();
+    }
 }
