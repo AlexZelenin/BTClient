@@ -105,9 +105,13 @@ Component {
 
                     spacing: 5
                     CButton {
+                        id: btn_send
                         width: 100
                         height: 35
                         btnText: "Отправить"
+                        clicked: () => {
+                                     controller.pushData(address)
+                                 }
                     }
 
                     TextField {

@@ -37,25 +37,28 @@ void BluetoothController::stopScanDevices()
 
 void BluetoothController::pushData(const QString &address)
 {
-
-    m_transferManager = new QBluetoothTransferManager(this);
+    qDebug() << "address: " << address;
+    QBluetoothTransferManager *transferManager = new QBluetoothTransferManager(this);
 
     QBluetoothAddress remoteAddress(address);
     QBluetoothTransferRequest request(remoteAddress);
 
-    foreach(QFile *file, m_files) {
-        QBluetoothTransferReply *reply = m_transferManager->put(request, file);
+    //foreach(QFile *file, m_files) {
 
-        if (reply->error() == QBluetoothTransferReply::NoError) {
+    QFile* const file = m_files.at(0);
 
-            connect(reply, SIGNAL(finished(QBluetoothTransferReply*)),
-                    this, SLOT(transferFinished(QBluetoothTransferReply*)));
-            connect(reply, SIGNAL(error(QBluetoothTransferReply::TransferError)),
-                    this, SLOT(error(QBluetoothTransferReply::TransferError)));
-        } else {
-            qWarning() << "Cannot push file: " << reply->errorString();
-        }
+    QBluetoothTransferReply *reply = transferManager->put(request, file);
+    Q_ASSERT(reply != Q_NULLPTR);
+
+    if (reply->error() == QBluetoothTransferReply::NoError) {
+        connect(reply, SIGNAL(finished(QBluetoothTransferReply*)),
+                this, SLOT(transferFinished(QBluetoothTransferReply*)));
+        connect(reply, SIGNAL(error(QBluetoothTransferReply::TransferError)),
+                this, SLOT(error(QBluetoothTransferReply::TransferError)));
+    } else {
+        qWarning() << "Cannot push file: " << reply->errorString();
     }
+    //}
 }
 
 void BluetoothController::attachFile()
@@ -171,5 +174,5 @@ void BluetoothController::requestPairing(const QBluetoothAddress &address)
 void BluetoothController::startClient(const QBluetoothAddress &deviceInfo) {
     connect(m_socket, &QBluetoothSocket::connected, this, &BluetoothController::socketConnected);
 
-    m_socket->connectToService(deviceInfo, QBluetoothUuid(serviceUuid));
+    m_socket->connectToService(deviceInfo, 1/* QBluetoothUuid(serviceUuid)*/);
 }
