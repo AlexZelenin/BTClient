@@ -99,6 +99,7 @@ void BluetoothController::deviceDiscovered(const QBluetoothDeviceInfo &device)
 void BluetoothController::transferFinished(QBluetoothTransferReply * replay)
 {
     Q_UNUSED(replay)
+    qDebug() << "Transfer finished: " << replay->errorString();
 }
 
 void BluetoothController::error(QBluetoothTransferReply::TransferError error)
