@@ -37,6 +37,11 @@ Component {
                 function onFileAttached(str) {
                     files.text = str;
                 }
+
+                function onTransferProgress(bytes, max) {
+                    transferDialog.prgs = bytes;
+                    transferDialog.maxValue = max;
+                }
             }
 
             RowLayout {
@@ -89,6 +94,11 @@ Component {
 
             color: "transparent"
 
+            Progress {
+                id: transferDialog
+
+            }
+
             ColumnLayout {
                 id: clm_lay
                 anchors.fill: item_control
@@ -110,7 +120,8 @@ Component {
                         height: 35
                         btnText: "Отправить"
                         onClicked: {
-                            controller.pushData(address)
+                            controller.pushData(address, files.text)
+                            transferDialog.open()
                         }
                     }
 

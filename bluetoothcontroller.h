@@ -19,7 +19,7 @@ public:
 
     Q_INVOKABLE void startScanDevices();
     Q_INVOKABLE void stopScanDevices();
-    Q_INVOKABLE void pushData(const QString& address);
+    Q_INVOKABLE void pushData(const QString& address, const QString& file);
     Q_INVOKABLE void attachFile();
 
 public slots:
@@ -40,7 +40,8 @@ public slots:
 signals:
     void addDevice(const QBluetoothDeviceInfo&);
     void connected();
-    void fileAttached(const QString&);
+    void fileAttached(const QString&); 
+    void transferProgress(qint64, qint64);
 
 signals:
 

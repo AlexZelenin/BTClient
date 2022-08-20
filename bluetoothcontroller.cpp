@@ -4,7 +4,7 @@
 #include <QBluetoothTransferRequest>
 #include <QBluetoothLocalDevice>
 #include <QFileDialog>
-#include <QMessageBox>e
+#include <QMessageBox>
 
 #include <QDebug>
 
@@ -19,7 +19,7 @@ BluetoothController::BluetoothController(QObject *parent)
     m_discoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
    // m_discoveryAgent->setLowEnergyDiscoveryTimeout(5000);
     m_localDevice = new QBluetoothLocalDevice(this);
-    m_socket = new QBluetoothSocket(this);
+    m_socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol, this);
 
     connect(m_socket, &QBluetoothSocket::connected, this, &BluetoothController::socketConnected);
 }
@@ -33,7 +33,7 @@ void BluetoothController::startScanDevices()
     connect(m_discoveryAgent, SIGNAL(deviceDiscovered(QBluetoothDeviceInfo)),
             this, SLOT(deviceDiscovered(QBluetoothDeviceInfo)));
 
-   // m_discoveryAgent->setInquiryType(QBluetoothDeviceDiscoveryAgent::GeneralUnlimitedInquiry);
+    m_discoveryAgent->setInquiryType(QBluetoothDeviceDiscoveryAgent::GeneralUnlimitedInquiry);
 
     m_discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::ClassicMethod);
 }
@@ -43,7 +43,7 @@ void BluetoothController::stopScanDevices()
     m_discoveryAgent->stop();
 }
 
-void BluetoothController::pushData(const QString &address)
+void BluetoothController::pushData(const QString &address, const QString& filename)
 {
     qDebug() << "address: " << address;
 
@@ -52,24 +52,26 @@ void BluetoothController::pushData(const QString &address)
     QBluetoothAddress remoteAddress(address);
     QBluetoothTransferRequest request(remoteAddress);
 
-    //foreach(QFile *file, m_files) {
-
-    QFile* const file = m_files.at(0);
+    QFile* file = new QFile(filename);
 
     QBluetoothTransferReply *reply = transferManager.put(request, file);
 
     Q_ASSERT(reply && "https://forum.qt.io/topic/125736/qbluetoothtransfer-not-sending-file");
-qWarning() << "Cannot push file: " << reply->errorString();
-    if (reply->error()) {
+
+    if (reply->error() != QBluetoothTransferReply::NoError) {
         qWarning() << "Cannot push file: " << reply->errorString();
         reply->deleteLater();
+        return;
     }
+
+    connect(reply, &QBluetoothTransferReply::transferProgress, this, &BluetoothController::transferProgress);
 
     connect(reply, SIGNAL(finished(QBluetoothTransferReply*)),
             this, SLOT(transferFinished(QBluetoothTransferReply*)));
     connect(reply, SIGNAL(error(QBluetoothTransferReply::TransferError)),
             this, SLOT(error(QBluetoothTransferReply::TransferError)));
-    //}
+
+
 }
 
 void BluetoothController::attachFile()
@@ -197,6 +199,6 @@ void BluetoothController::startClient(const QBluetoothAddress &deviceInfo) {
     info.setDevice(dev);
 
     qDebug() << "Registered devs: " << info.device().address().toString();
-    m_socket->connectToService(info);
-    //m_socket->connectToService(deviceInfo,  QBluetoothUuid(QBluetoothUuid::Rfcomm));
+   // m_socket->connectToService(info);
+    m_socket->connectToService(deviceInfo,  QBluetoothUuid(QBluetoothUuid::Rfcomm));
 }

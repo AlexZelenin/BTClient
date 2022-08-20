@@ -55,8 +55,8 @@ Item {
                     btnText: "Остановить поиск"
 
                     onClicked: {
-                                 controller.stopScanDevices()
-                             }
+                        controller.stopScanDevices()
+                    }
                 }
             }
         }

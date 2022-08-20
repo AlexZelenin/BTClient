@@ -3,7 +3,7 @@
         <file>main.qml</file>
         <file>controls/CButton.qml</file>
         <file>controls/MainView.qml</file>
-        <file>controls/DeviceItemDelegate.qml</file>
         <file>controls/DeviceItem.qml</file>
+        <file>controls/Progress.qml</file>
     </qresource>
 </RCC>
