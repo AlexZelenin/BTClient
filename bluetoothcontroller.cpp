@@ -5,10 +5,12 @@
 #include <QBluetoothLocalDevice>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QPointer>
 
 #include <QDebug>
 
 static const QLatin1String serviceUuid("00001101-0000-1000-8000-00805F9B34FB");
+static const QLatin1String serviceUuidFile("00001106-0000-1000-8000-00805F9B34FB");
 
 QMap<QString, QBluetoothDeviceInfo> gDevs;
 
@@ -19,7 +21,7 @@ BluetoothController::BluetoothController(QObject *parent)
     m_discoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
    // m_discoveryAgent->setLowEnergyDiscoveryTimeout(5000);
     m_localDevice = new QBluetoothLocalDevice(this);
-    m_socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol, this);
+    m_socket = new QBluetoothSocket(QBluetoothServiceInfo::L2capProtocol, this);
 
     connect(m_socket, &QBluetoothSocket::connected, this, &BluetoothController::socketConnected);
 }
@@ -54,10 +56,10 @@ void BluetoothController::pushData(const QString &address, const QString& filena
 
     QFile* file = new QFile(filename);
 
-    QBluetoothTransferReply *reply = transferManager.put(request, file);
+    QPointer<QBluetoothTransferReply> reply = transferManager.put(request, file);
 
-    Q_ASSERT(reply && "https://forum.qt.io/topic/125736/qbluetoothtransfer-not-sending-file");
-
+    Q_ASSERT(reply != Q_NULLPTR && "https://forum.qt.io/topic/125736/qbluetoothtransfer-not-sending-file");
+qDebug() << reply;
     if (reply->error() != QBluetoothTransferReply::NoError) {
         qWarning() << "Cannot push file: " << reply->errorString();
         reply->deleteLater();
@@ -200,5 +202,5 @@ void BluetoothController::startClient(const QBluetoothAddress &deviceInfo) {
 
     qDebug() << "Registered devs: " << info.device().address().toString();
    // m_socket->connectToService(info);
-    m_socket->connectToService(deviceInfo,  QBluetoothUuid(QBluetoothUuid::Rfcomm));
+    m_socket->connectToService(deviceInfo,  QBluetoothUuid(serviceUuidFile));
 }
