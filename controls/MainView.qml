@@ -29,9 +29,9 @@ Item {
 
                     btnText: "Поиск устройств"
 
-                    clicked: () => {
-                                 controller.startScanDevices();
-                             }
+                    onClicked: {
+                        controller.startScanDevices();
+                    }
                 }
                 CButton {
                     id: btn_clear
@@ -41,9 +41,9 @@ Item {
 
                     btnText: "Очистить"
 
-                    clicked: () => {
-                                 devicemodel.clear()
-                             }
+                    onClicked: {
+                        devicemodel.clear()
+                    }
                 }
 
                 CButton {
@@ -54,7 +54,7 @@ Item {
 
                     btnText: "Остановить поиск"
 
-                    clicked: () => {
+                    onClicked: {
                                  controller.stopScanDevices()
                              }
                 }
@@ -62,13 +62,13 @@ Item {
         }
 
         Component {
-             id: highlight
-             Rectangle {
-                 width: table.width;
-                 height: table.height
-                 color: "lightsteelblue"; radius: 5
-             }
-         }
+            id: highlight
+            Rectangle {
+                width: table.width;
+                height: table.height
+                color: "lightsteelblue"; radius: 5
+            }
+        }
 
         ListView {
             id: table

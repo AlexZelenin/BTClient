@@ -68,9 +68,9 @@ Component {
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                     btnText: "Подключить"
                     btnColor: "#dcdcdc"
-                    clicked: () => {
-                                 controller.startConnect(address);
-                             }
+                    onClicked: {
+                        controller.startConnect(address)
+                    }
                 }
             }
         } // Header
@@ -109,9 +109,9 @@ Component {
                         width: 100
                         height: 35
                         btnText: "Отправить"
-                        clicked: () => {
-                                     controller.pushData(address)
-                                 }
+                        onClicked: {
+                            controller.pushData(address)
+                        }
                     }
 
                     TextField {
@@ -145,9 +145,9 @@ Component {
                         height: 35
                         btnText: "Открыть файл"
 
-                        clicked: () => {
-                                     controller.attachFile();
-                                 }
+                        onClicked:  {
+                            controller.attachFile();
+                        }
                     }
 
                     TextField {

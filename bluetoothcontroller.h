@@ -8,6 +8,7 @@
 #include <QBluetoothTransferReply>
 #include <QBluetoothSocket>
 #include <QFile>
+#include <QModelIndex>
 
 
 class BluetoothController : public QObject

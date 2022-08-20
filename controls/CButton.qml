@@ -16,9 +16,10 @@ Item {
     property int borderRadius: 4
     property string btnText: "Default btn text"
 
-    property var clicked: () => {}
-    property var pressed: () => {}
-    property var released: () => {}
+   // property var clicked: () => {}
+    signal clicked()
+    signal pressed()
+    signal released()
 
     Rectangle {
         id: btn_style
