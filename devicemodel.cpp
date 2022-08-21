@@ -2,7 +2,7 @@
 
 #include <QDebug>
 #include <QBluetoothAddress>
-
+#include <QBluetoothDeviceInfo>
 
 DeviceModel::DeviceModel(QObject* parent)
     : QAbstractListModel(parent)
@@ -31,9 +31,9 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     if (role == Address)
-        return m_devices.at(index.row()).address().toString();
+        return m_devices.at(index.row()).device().address().toString();
     if (role == DeviceName)
-        return m_devices.at(index.row()).name();
+        return m_devices.at(index.row()).device().name();
     else
         return QVariant();
 }
@@ -48,12 +48,14 @@ QHash<int, QByteArray> DeviceModel::roleNames() const
     return roleNames;
 }
 
-void DeviceModel::addDevice(const QBluetoothDeviceInfo &info)
+void DeviceModel::addDevice(const QBluetoothServiceInfo &info)
 {
+    qDebug() << "Model add device: " << info.device().name();
+
     bool contains = false;
 
-    foreach(const QBluetoothDeviceInfo &device, m_devices) {
-        if (device.address().toString() == info.address().toString())
+    foreach(const QBluetoothServiceInfo &i, m_devices) {
+        if (i.device().address().toString() == info.device().address().toString())
             contains = true;
     }
 

@@ -5,6 +5,7 @@
 #include "bluetoothcontroller.h"
 #include "devicemodel.h"
 
+
 int main(int argc, char *argv[])
 {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -15,8 +16,8 @@ int main(int argc, char *argv[])
     BluetoothController controller;
     DeviceModel model;
 
-    QObject::connect(&controller, SIGNAL(addDevice(QBluetoothDeviceInfo)),
-                     &model, SLOT(addDevice(QBluetoothDeviceInfo)));
+    QObject::connect(&controller, SIGNAL(addDevice(QBluetoothServiceInfo)),
+                     &model, SLOT(addDevice(QBluetoothServiceInfo)));
 
     QQmlApplicationEngine engine;
 

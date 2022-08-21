@@ -13,6 +13,15 @@ Dialog {
     visible: false
     title: "File transfer progress"
 
+    Connections {
+        target: controller
+
+        function onTransferProgress(bytes, max) {
+            pb.to = max;
+            pb.value = max;
+        }
+    }
+
     contentItem: Rectangle {
         id: pstyle
         color: "transparent"
@@ -23,9 +32,9 @@ Dialog {
             id: pb
             width: parent.width
             height: 35
-            value: dialog.prgs
+            //value: dialog.prgs
             from: 0
-            to: dialog.maxValue
+            //to: dialog.maxValue
 
         }
     }

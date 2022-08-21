@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QAbstractListModel>
-#include <QBluetoothDeviceInfo>
+#include <QBluetoothServiceInfo>
 #include <QList>
 
 
@@ -27,10 +27,10 @@ public:
     QHash<int, QByteArray> roleNames() const;
 
 public slots:
-    void addDevice(const QBluetoothDeviceInfo& info);
+    void addDevice(const QBluetoothServiceInfo& info);
 
 private:
-    QList<QBluetoothDeviceInfo> m_devices;
+    QList<QBluetoothServiceInfo> m_devices;
 
 };
 

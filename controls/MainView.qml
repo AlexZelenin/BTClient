@@ -30,7 +30,10 @@ Item {
                     btnText: "Поиск устройств"
 
                     onClicked: {
-                        controller.startScanDevices();
+                        controller.startDiscovery();
+                        busy_img.playing = true
+                        busy_img.paused = false
+                        busy_img.visible = true
                     }
                 }
                 CButton {
@@ -55,7 +58,29 @@ Item {
                     btnText: "Остановить поиск"
 
                     onClicked: {
-                        controller.stopScanDevices()
+                        controller.stopButton()
+                        busy_img.playing = false
+                        busy_img.paused = true
+                        busy_img.visible = false
+                    }
+                }
+
+                AnimatedImage {
+                    id: busy_img
+                    source: "qrc:/busy.gif"
+                    Layout.alignment: Qt.AlignHCenter
+                    width: 30
+                    height: 30
+                    playing: false
+                    visible: false
+
+                    Text {
+                        id: info_text
+                        anchors.left: busy_img.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.margins: 10
+                        text: qsTr("Идет поиск устройств ...")
+                        verticalAlignment: Qt.AlignBottom
                     }
                 }
             }

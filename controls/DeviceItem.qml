@@ -30,17 +30,16 @@ Component {
 
             Connections {
                 target: controller
-                function onConnected() {
-                    btn_connect.btnColor = qsTr("#000")
-                }
+//                function onConnected() {
+//                    btn_connect.btnColor = qsTr("#000")
+//                }
 
-                function onFileAttached(str) {
+                function onOpenFile(str) {
                     files.text = str;
                 }
 
-                function onTransferProgress(bytes, max) {
-                    transferDialog.prgs = bytes;
-                    transferDialog.maxValue = max;
+                function onSockConnect() {
+                    btn_connect.enabled = false
                 }
             }
 
@@ -74,6 +73,7 @@ Component {
                     btnText: "Подключить"
                     btnColor: "#dcdcdc"
                     onClicked: {
+                        //pin_confirm.run()
                         controller.startConnect(address)
                     }
                 }
@@ -113,22 +113,16 @@ Component {
                 RowLayout {
                     id: row
 
+                    //anchors.margins: 10
+
                     spacing: 5
-                    CButton {
-                        id: btn_send
-                        width: 100
-                        height: 35
-                        btnText: "Отправить"
-                        onClicked: {
-                            controller.pushData(address, files.text)
-                            transferDialog.open()
-                        }
-                    }
 
                     TextField {
                         id: textInput
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignRight
+                        Layout.leftMargin: 5
+
                         implicitHeight: 35
                         text: qsTr("")
                         font.pixelSize: 14
@@ -144,11 +138,24 @@ Component {
                         }
                     }
 
+                    CButton {
+                        id: btn_send
 
+                        Layout.rightMargin: 5
+
+                        width: 100
+                        height: 35
+                        btnText: "Отправить"
+                        onClicked: {
+                            controller.sendData(textInput.text)
+                        }
+                    }
                 }
 
                 RowLayout {
                     id: row2
+
+                    //anchors.margins: 10
 
                     spacing: 5
                     CButton {
@@ -156,8 +163,10 @@ Component {
                         height: 35
                         btnText: "Открыть файл"
 
+                        Layout.leftMargin: 5
+
                         onClicked:  {
-                            controller.attachFile();
+                            controller.fileSelect();
                         }
                     }
 
@@ -176,6 +185,20 @@ Component {
                             border.width: 1
                             border.color: "green"
                             radius: 4
+                        }
+                    }
+
+                    CButton {
+                        id: btn_send_file
+
+                        Layout.rightMargin: 5
+
+                        width: 100
+                        height: 35
+                        btnText: "Отправить"
+                        onClicked: {
+                            controller.sendFile(address, files.text)
+                            transferDialog.open()
                         }
                     }
 

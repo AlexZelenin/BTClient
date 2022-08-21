@@ -24,4 +24,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     bluetoothcontroller.h \
-    devicemodel.h
+    devicemodel.h \
+    uuid_services.h
+
+DISTFILES +=
