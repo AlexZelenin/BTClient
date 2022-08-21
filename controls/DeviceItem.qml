@@ -30,9 +30,6 @@ Component {
 
             Connections {
                 target: controller
-//                function onConnected() {
-//                    btn_connect.btnColor = qsTr("#000")
-//                }
 
                 function onOpenFile(str) {
                     files.text = str;
@@ -112,9 +109,6 @@ Component {
 
                 RowLayout {
                     id: row
-
-                    //anchors.margins: 10
-
                     spacing: 5
 
                     TextField {
@@ -154,8 +148,6 @@ Component {
 
                 RowLayout {
                     id: row2
-
-                    //anchors.margins: 10
 
                     spacing: 5
                     CButton {

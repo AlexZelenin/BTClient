@@ -58,7 +58,7 @@ void BluetoothController::startDiscovery(const QBluetoothUuid &uuid)
     if (m_discoveryAgent->isActive())
         m_discoveryAgent->stop();
 
-    m_discoveryAgent->setUuidFilter(uuid);
+    //m_discoveryAgent->setUuidFilter(uuid);
     m_discoveryAgent->start();
 
     if (!m_discoveryAgent->isActive() ||
@@ -144,8 +144,11 @@ void BluetoothController::stopButton()
 void BluetoothController::startConnect(const QString& address)
 {
     if (m_discoveredServices.contains(address)) {
+        m_socket->disconnectFromService();
         qDebug() << "Address: " << QBluetoothAddress(address) << " contains";
-        m_socket->connectToService(QBluetoothAddress(address), QBluetoothUuid(AudioVideoServiceClass_UUID), QIODevice::ReadWrite);
+        m_socket->connectToService(QBluetoothAddress(address), QBluetoothUuid(QBluetoothUuid::SerialPort), QIODevice::ReadWrite);
+
+        qDebug()  << m_socket->socketType();
 
         connect(m_socket, &QBluetoothSocket::connected, this, &BluetoothController::socketConnected);
         connect(m_socket, &QBluetoothSocket::readyRead, this, &BluetoothController::socketRead);
@@ -154,7 +157,6 @@ void BluetoothController::startConnect(const QString& address)
 
 void BluetoothController::sendData(const QString &data)
 {
-    m_socket->open(QIODevice::ReadWrite);
     const QByteArray bytes = data.toUtf8();
     m_socket->write(bytes, bytes.length());
 }
@@ -170,12 +172,14 @@ QString BluetoothController::addressToName(const QBluetoothAddress &address) con
 
 void BluetoothController::displayPin(const QBluetoothAddress &address, QString pin)
 {
+    Q_UNUSED(address);
+    Q_UNUSED(pin);
 }
 
 void BluetoothController::displayConfirmation(const QBluetoothAddress &address, QString pin)
 {
     Q_UNUSED(address);
-
+    Q_UNUSED(pin);
     //if (m_pindisplay)
      //   m_pindisplay->deleteLater();
     //m_pindisplay = new pinDisplay(QString("Confirm this pin is the same"), pin, this);

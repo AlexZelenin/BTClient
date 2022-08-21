@@ -16,7 +16,6 @@ Item {
     property int borderRadius: 4
     property string btnText: "Default btn text"
 
-   // property var clicked: () => {}
     signal clicked()
     signal pressed()
     signal released()
