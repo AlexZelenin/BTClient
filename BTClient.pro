@@ -16,11 +16,11 @@ RESOURCES += qml.qrc
 INCLUDEPATH  += $$PWD/3rd-party/win-bluetooth/include
 
 CONFIG(debug, debug|release) {
-    LIBS += -L$$PWD/3rd-party/win-bluetooth/lib/x64/Debug win-bluetooth.lib User32.lib
+    LIBS += -L$$PWD/3rd-party/win-bluetooth/lib/x64/vs2022/Debug win-bluetooth.lib User32.lib
 }
 
 CONFIG(release, debug|release) {
-    LIBS += -L$$PWD/3rd-party/win-bluetooth/lib/x64/Release win-bluetooth.lib User32.lib
+    LIBS += -L$$PWD/3rd-party/win-bluetooth/lib/x64/vs2022/Release win-bluetooth.lib User32.lib
 }
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
