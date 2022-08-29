@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QMetaType>
 
 #include "bluetoothcontroller.h"
 #include "devicemodel.h"
@@ -13,11 +14,12 @@ int main(int argc, char *argv[])
 #endif
     QApplication app(argc, argv);
 
+    qRegisterMetaType<BluetoothServiceInfo>("BluetoothServiceInfo");
+
     BluetoothController controller;
     DeviceModel model;
 
-    QObject::connect(&controller, SIGNAL(addDevice(QBluetoothServiceInfo)),
-                     &model, SLOT(addDevice(QBluetoothServiceInfo)));
+    QObject::connect(&controller, &BluetoothController::addDevice, &model, &DeviceModel::addDevice);
 
     QQmlApplicationEngine engine;
 

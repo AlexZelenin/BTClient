@@ -1,0 +1,18 @@
+#include <Bluetooth.h>
+#include <bluetoothAddress.h>
+#include <bluetoothUuids.h>
+#include <bluetoothSocket.h>
+#include <bluetoothTransferRequest.h>
+#include <bluetoothTransferReply.h>
+#include <bluetoothTransferManager.h>
+#include <bluetoothDeviceInfo.h>
+#include <bluetoothServiceDiscoveryAgent.h>
+#include <bluetoothServiceinfo.h>
+#include <bluetoothServer.h>
+#include <bluetoothLocalDevice.h>
+#include <bluetoothHostInfo.h>
+#include <bluetoothDeviceDiscoveryAgent.h>
+
+#ifdef _WINDOWS_
+#error Don't include windows.h or bluetoothUtils.h in header files!
+#endif

@@ -62,18 +62,19 @@ Component {
                     }
                 }
 
-                CButton {
-                    id: btn_connect
-                    implicitWidth: 100
-                    Layout.fillHeight: true
-                    Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                    btnText: "Подключить"
-                    btnColor: "#dcdcdc"
-                    onClicked: {
-                        //pin_confirm.run()
-                        controller.startConnect(address)
-                    }
-                }
+                   /* CButton {
+                        id: btn_connect
+                        implicitWidth: 100
+                        Layout.fillHeight: true
+                        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                        btnText: "Подключить"
+                        btnColor: "#dcdcdc"
+                        onClicked: {
+                            //pin_confirm.run()
+                            controller.startConnect(address, "5"/*portInput.text)
+                        }
+                    }*/
+
             }
         } // Header
 
@@ -111,11 +112,43 @@ Component {
                     id: row
                     spacing: 5
 
+                    Text {
+                        id: label_port
+
+                        Layout.fillWidth: false
+                        Layout.alignment: Qt.AlignRight
+                        Layout.leftMargin: 5
+
+                        text: "Port"
+                    }
+
+                    TextField {
+                        id: portInput
+                        Layout.fillWidth: false
+                        Layout.alignment: Qt.AlignRight
+                        Layout.leftMargin: 5
+
+                        implicitHeight: 35
+                        implicitWidth: 70
+                        text: qsTr("5")
+                        font.pixelSize: 14
+                        placeholderText: "Port"
+                        validator: IntValidator{}
+
+                        background: Rectangle {
+                            anchors.fill: parent
+                            color: "#fff"
+                            border.width: 1
+                            border.color: "green"
+                            radius: 4
+                        }
+                    }
+
                     TextField {
                         id: textInput
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignRight
-                        Layout.leftMargin: 5
+                        Layout.leftMargin: 0
 
                         implicitHeight: 35
                         text: qsTr("")
@@ -141,7 +174,7 @@ Component {
                         height: 35
                         btnText: "Отправить"
                         onClicked: {
-                            controller.sendData(textInput.text)
+                            controller.sendData(address, portInput.text, textInput.text)
                         }
                     }
                 }

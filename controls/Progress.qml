@@ -18,7 +18,7 @@ Dialog {
 
         function onTransferProgress(bytes, max) {
             pb.to = max;
-            pb.value = max;
+            pb.value = bytes;
         }
     }
 

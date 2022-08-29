@@ -1,8 +1,9 @@
 #include "devicemodel.h"
 
 #include <QDebug>
-#include <QBluetoothAddress>
-#include <QBluetoothDeviceInfo>
+
+
+static const QLatin1String emptyAddress("00:00:00:00:00:00");
 
 DeviceModel::DeviceModel(QObject* parent)
     : QAbstractListModel(parent)
@@ -30,12 +31,18 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const
     if (index.row() >= m_devices.size())
         return QVariant();
 
-    if (role == Address)
-        return m_devices.at(index.row()).device().address().toString();
-    if (role == DeviceName)
-        return m_devices.at(index.row()).device().name();
-    else
+    switch(role) {
+    case Address: {
+        return  m_devices.at(index.row()).address().toString();
+    }
+    case DeviceName: {
+        return m_devices.at(index.row()).name();
+    }
+    default:
         return QVariant();
+    }
+
+    return QVariant();
 }
 
 QHash<int, QByteArray> DeviceModel::roleNames() const
@@ -48,14 +55,17 @@ QHash<int, QByteArray> DeviceModel::roleNames() const
     return roleNames;
 }
 
-void DeviceModel::addDevice(const QBluetoothServiceInfo &info)
+void DeviceModel::addDevice(const BluetoothDeviceInfo &info)
 {
-    qDebug() << "Model add device: " << info.device().name();
+    qDebug() << "Model add device: " << info.name();
+
+    if (info.address().toString() == emptyAddress)
+        return;
 
     bool contains = false;
 
-    foreach(const QBluetoothServiceInfo &i, m_devices) {
-        if (i.device().address().toString() == info.device().address().toString())
+    foreach(const BluetoothDeviceInfo &i, m_devices) {
+        if (i.address().toString() == info.address().toString())
             contains = true;
     }
 

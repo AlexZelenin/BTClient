@@ -1,60 +1,44 @@
 ﻿#include "bluetoothcontroller.h"
 
-#include <qbluetoothdeviceinfo.h>
-#include <qbluetoothaddress.h>
-#include <qbluetoothtransferrequest.h>
-#include <qbluetoothtransferreply.h>
-#include <qbluetoothlocaldevice.h>
-
-#include <QBluetoothTransferManager>
-#include <QBluetoothTransferRequest>
-#include <QBluetoothLocalDevice>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPointer>
-
+#include <QTimer>
 
 #include <QDebug>
-
-#include "uuid_services.h"
 
 
 BluetoothController::BluetoothController(QObject *parent)
     : QObject{parent}
 {
-    m_localDevice = new QBluetoothLocalDevice(this);
-    QBluetoothAddress adapterAddress = m_localDevice->address();
+    m_localDevice = new BluetoothLocalDevice(this);
+    BluetoothAddress adapterAddress = m_localDevice->address();
 
-    qDebug() << adapterAddress.toString();
+    qDebug() << "Adapter address: " << adapterAddress.toString();
 
-    m_discoveryAgent = new QBluetoothServiceDiscoveryAgent(adapterAddress);
+    m_discoveryAgent = new BluetoothDeviceDiscoveryAgent(adapterAddress);
 
-    connect(m_discoveryAgent, SIGNAL(serviceDiscovered(QBluetoothServiceInfo)),
-            this, SLOT(serviceDiscovered(QBluetoothServiceInfo)));
+    connect(m_discoveryAgent, &BluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &BluetoothController::serviceDiscovered);
+    connect(m_localDevice, &BluetoothLocalDevice::pairingDisplayPinCode, this, &BluetoothController::displayPin);
+    connect(m_localDevice, &BluetoothLocalDevice::pairingDisplayConfirmation, this, &BluetoothController::displayConfirmation);
+    connect(m_localDevice, &BluetoothLocalDevice::pairingFinished, this, &BluetoothController::pairingFinished);
+    connect(m_localDevice, &BluetoothLocalDevice::error, this, &BluetoothController::pairingError);
 
-    connect(m_localDevice, SIGNAL(pairingDisplayPinCode(QBluetoothAddress,QString)),
-            this, SLOT(displayPin(QBluetoothAddress,QString)));
-    connect(m_localDevice, SIGNAL(pairingDisplayConfirmation(QBluetoothAddress,QString)),
-            this, SLOT(displayConfirmation(QBluetoothAddress,QString)));
-    connect(m_localDevice, SIGNAL(pairingFinished(QBluetoothAddress,QBluetoothLocalDevice::Pairing)),
-            this, SLOT(pairingFinished(QBluetoothAddress,QBluetoothLocalDevice::Pairing)));
-    connect(m_localDevice, SIGNAL(error(QBluetoothLocalDevice::Error)),
-            this, SLOT(pairingError(QBluetoothLocalDevice::Error)));
+    //m_socket = new BluetoothSocket;
 
-    m_socket = new QBluetoothSocket(QBluetoothServiceInfo::RfcommProtocol);
-
-    connect(m_socket, SIGNAL(error(QBluetoothSocket::SocketError)), this, SLOT(socketError(QBluetoothSocket::SocketError)));
-
+    //connect(m_socket, &BluetoothSocket::connected, this, &BluetoothController::socketConnected);
+    //connect(m_socket, &BluetoothSocket::readyRead, this, &BluetoothController::socketRead);
+    //connect(m_socket, &BluetoothSocket::error, this, &BluetoothController::socketError);
 }
 
 BluetoothController::~BluetoothController()
 {
-    delete m_discoveryAgent;
-    delete m_localDevice;
+    m_discoveryAgent->deleteLater();
 }
 
-void BluetoothController::startDiscovery(const QBluetoothUuid &uuid)
+void BluetoothController::startDiscovery(const BluetoothUuid &uuid)
 {
+
     if (m_discoveryAgent->isActive())
         m_discoveryAgent->stop();
 
@@ -62,52 +46,43 @@ void BluetoothController::startDiscovery(const QBluetoothUuid &uuid)
     m_discoveryAgent->start();
 
     if (!m_discoveryAgent->isActive() ||
-            m_discoveryAgent->error() != QBluetoothServiceDiscoveryAgent::NoError) {
+            m_discoveryAgent->error() != BluetoothDeviceDiscoveryAgent::NoError) {
         return;
     }
+
 }
 
-QBluetoothServiceInfo BluetoothController::service() const
+BluetoothDeviceInfo BluetoothController::service() const
 {
     return m_service;
 }
 
-void BluetoothController::serviceDiscovered(const QBluetoothServiceInfo &serviceInfo)
+void BluetoothController::serviceDiscovered(const BluetoothDeviceInfo &serviceInfo)
 {
-
-    qDebug() << "Discovered service on"
-             << serviceInfo.device().name() << serviceInfo.device().address().toString();
-    qDebug() << "\tService name:" << serviceInfo.serviceName();
-    qDebug() << "\tDescription:"
-             << serviceInfo.attribute(QBluetoothServiceInfo::ServiceDescription).toString();
-    qDebug() << "\tProvider:"
-             << serviceInfo.attribute(QBluetoothServiceInfo::ServiceProvider).toString();
-    qDebug() << "\tL2CAP protocol service multiplexer:"
-             << serviceInfo.protocolServiceMultiplexer();
-    qDebug() << "\tRFCOMM server channel:" << serviceInfo.serverChannel();
 
 
     QString remoteName;
-    if (serviceInfo.device().name().isEmpty())
-        remoteName = serviceInfo.device().address().toString();
+    if (serviceInfo.name().isEmpty())
+        remoteName = serviceInfo.address().toString();
     else
-        remoteName = serviceInfo.device().name();
+        remoteName = serviceInfo.name();
 
-    const QBluetoothAddress address = serviceInfo.device().address();
-    for (QBluetoothServiceInfo &info : m_discoveredServices) {
-        if (info.device().address() == address){
+    const BluetoothAddress address = serviceInfo.address();
+    for (BluetoothDeviceInfo &info : m_discoveredServices) {
+        if (info.address() == address){
             info = serviceInfo;
             return;
         }
     }
 
-    m_discoveredServices.insert(serviceInfo.device().address().toString(), serviceInfo);
+    m_discoveredServices.insert(serviceInfo.address().toString(), serviceInfo);
     emit addDevice(serviceInfo);
+
 }
 
 void BluetoothController::startDiscovery()
 {
-    startDiscovery(QBluetoothUuid(QBluetoothUuid::ObexObjectPush));
+    startDiscovery(BluetoothUuid(Protocol::OBEX));
 }
 
 void BluetoothController::fileSelect()
@@ -116,24 +91,33 @@ void BluetoothController::fileSelect()
     emit openFile(filepath);
 }
 
+static void doDeleteLater(QFile* obj) {
+    obj->deleteLater();
+}
+
 void BluetoothController::sendFile(const QString& address, const QString& filepath)
 {
-    QBluetoothTransferManager mgr;
-    QBluetoothTransferRequest req(m_discoveredServices[address].device().address());
+    m_manager = new BluetoothTransferManager;
+    BluetoothTransferRequest req(m_discoveredServices[address].address());
 
-    m_file = new QFile(filepath);
+    QSharedPointer<QFile> file = QSharedPointer<QFile>(new QFile, doDeleteLater);
+    file->setFileName(filepath);
+    QFileInfo file_info(filepath);
 
-    QBluetoothTransferReply *reply = mgr.put(req, m_file);
+    req.setAttribute(BluetoothTransferRequest::Attribute::NameAttribute, file_info.fileName());
 
-    reply->setParent(this);
+    m_reply = m_manager->put(req, file);
 
-    if (reply->error() != QBluetoothTransferReply::NoError){
+    m_reply->setParent(this);
+
+    if (m_reply->error() != BluetoothTransferReply::NoError){
         qDebug() << "Failed to send file";
-        reply->deleteLater();
+        m_reply->deleteLater();
         return;
     }
 
-    connect(reply, SIGNAL(transferProgress(qint64,qint64)), this, SIGNAL(transferProgress(qint64,qint64)));
+    connect(m_reply, &BluetoothTransferReply::transferProgress, this, &BluetoothController::transferProgress, Qt::QueuedConnection);
+    connect(m_reply, &BluetoothTransferReply::finished, this, &BluetoothController::transferFinished, Qt::QueuedConnection);
 }
 
 void BluetoothController::stopButton()
@@ -141,47 +125,74 @@ void BluetoothController::stopButton()
     m_discoveryAgent->stop();
 }
 
-void BluetoothController::startConnect(const QString& address)
+#if 0
+void BluetoothController::startConnect(const QString& address) const
 {
-    if (m_discoveredServices.contains(address)) {
+    /*if (m_discoveredServices.contains(address)) {
         m_socket->disconnectFromService();
-        qDebug() << "Address: " << QBluetoothAddress(address) << " contains";
-        m_socket->connectToService(QBluetoothAddress(address), QBluetoothUuid(QBluetoothUuid::SerialPort), QIODevice::ReadWrite);
+        qDebug() << "Address: " << address << " contains";
+        m_socket->connectToService(BluetoothAddress(address), port.toInt());
 
         qDebug()  << m_socket->socketType();
+    }*/
+}
+#endif
 
-        connect(m_socket, &QBluetoothSocket::connected, this, &BluetoothController::socketConnected);
-        connect(m_socket, &QBluetoothSocket::readyRead, this, &BluetoothController::socketRead);
+void BluetoothController::sendData(const QString& deviceName, const QString& port, const QString &data)
+{
+    qDebug() << "Send to: " << deviceName;
+
+    BluetoothAddress address(deviceName);
+    m_socket = new BluetoothSocket;
+
+    if (BluetoothSocket::SocketState::UnconnectedState == m_socket->state()) {
+        qDebug() << "Socket unconnected";
+    } else {
+        qDebug() << "Socket already connected";
     }
+
+
+    connect(m_socket, &BluetoothSocket::connected, this, [this, data](){
+        qDebug() << "Socket connected";
+        m_socket->write(data.toUtf8(), data.length());
+    }, Qt::QueuedConnection);
+
+    connect(m_socket, QOverload<BluetoothSocket::SocketError>::of(&BluetoothSocket::error), this,
+            &BluetoothController::socketError, Qt::QueuedConnection);
+
+    connect(m_socket, &BluetoothSocket::readyRead, this, &BluetoothController::socketRead, Qt::QueuedConnection);
+
+    connect(m_socket, &BluetoothSocket::disconnected, this, &BluetoothController::socketDisconnected, Qt::QueuedConnection);
+
+    QTimer::singleShot(100, [this, address, port]()
+    {
+        m_socket->connectToService(address, port.toUInt());
+    });
+
 }
 
-void BluetoothController::sendData(const QString &data)
+QString BluetoothController::addressToName(const BluetoothAddress &address) const
 {
-    const QByteArray bytes = data.toUtf8();
-    m_socket->write(bytes, bytes.length());
-}
 
-QString BluetoothController::addressToName(const QBluetoothAddress &address) const
-{
-    for (const QBluetoothServiceInfo &info : m_discoveredServices) {
-        if (info.device().address() == address)
-            return info.device().name();
+    for (const BluetoothDeviceInfo &info : m_discoveredServices) {
+        if (info.address() == address)
+            return info.name();
     }
     return address.toString();
 }
 
-void BluetoothController::displayPin(const QBluetoothAddress &address, QString pin)
+void BluetoothController::displayPin(const BluetoothAddress &address, QString pin)
 {
     Q_UNUSED(address);
     Q_UNUSED(pin);
 }
 
-void BluetoothController::displayConfirmation(const QBluetoothAddress &address, QString pin)
+void BluetoothController::displayConfirmation(const BluetoothAddress &address, QString pin)
 {
     Q_UNUSED(address);
     Q_UNUSED(pin);
     //if (m_pindisplay)
-     //   m_pindisplay->deleteLater();
+    //   m_pindisplay->deleteLater();
     //m_pindisplay = new pinDisplay(QString("Confirm this pin is the same"), pin, this);
     //connect(m_pindisplay, SIGNAL(accepted()), this, SLOT(displayConfAccepted()));
     //connect(m_pindisplay, SIGNAL(rejected()), this, SLOT(displayConfReject()));
@@ -193,24 +204,27 @@ void BluetoothController::displayConfAccepted()
 {
     m_localDevice->pairingConfirmation(true);
 }
+
+void BluetoothController::transferFinished()
+{
+    qDebug() << "Transfer finished";
+    m_reply->deleteLater();
+    m_manager->deleteLater();
+    //emit exitPrgrsDlg();
+}
+
 void BluetoothController::displayConfReject()
 {
     m_localDevice->pairingConfirmation(false);
 }
 
-void BluetoothController::pairingFinished(const QBluetoothAddress &address, QBluetoothLocalDevice::Pairing status)
+void BluetoothController::pairingFinished(const BluetoothAddress &address, BluetoothLocalDevice::Pairing status)
 {
-    QBluetoothServiceInfo service;
-
-    if (m_discoveredServices.contains(address.toString())) {
-        service = m_discoveredServices.value(address.toString());
-    }
-
     QMessageBox msgBox;
     if (m_pairingError) {
         msgBox.setText("Pairing failed with " + address.toString());
-    } else if (status == QBluetoothLocalDevice::Paired
-               || status == QBluetoothLocalDevice::AuthorizedPaired) {
+    } else if (status == BluetoothLocalDevice::Paired
+               || status == BluetoothLocalDevice::AuthorizedPaired) {
         msgBox.setText("Paired successfully with " + address.toString());
     } else {
         msgBox.setText("Pairing released with " + address.toString());
@@ -221,53 +235,65 @@ void BluetoothController::pairingFinished(const QBluetoothAddress &address, QBlu
     msgBox.exec();
 }
 
-void BluetoothController::pairingError(QBluetoothLocalDevice::Error error)
+void BluetoothController::pairingError(BluetoothLocalDevice::Error error)
 {
-    if (error != QBluetoothLocalDevice::PairingError)
+    if (error != BluetoothLocalDevice::PairingError)
         return;
 
     m_pairingError = true;
-    pairingFinished(m_service.device().address(), QBluetoothLocalDevice::Unpaired);
+    pairingFinished(m_service.address(), BluetoothLocalDevice::Unpaired);
 }
 
 void BluetoothController::socketConnected()
 {
+    qDebug() << "Socket connected";
+
     emit sockConnect();
 }
 
 void BluetoothController::socketRead()
 {
-    QByteArray data = m_socket->readAll();
+    const QByteArray data = m_socket->readAll();
     qDebug() << "Incomming data: " << data;
 }
 
-void BluetoothController::socketError(QBluetoothSocket::SocketError error)
+void BluetoothController::socketError(BluetoothSocket::SocketError error)
 {
+
+    qDebug() << "Socket error: " << error;
+
     switch (error) {
-    case QBluetoothSocket::NoSocketError:
+    case BluetoothSocket::SocketError::NoSocketError:
         qDebug() << "QBluetoothSocket::NoSocketError";
         break;
-    case QBluetoothSocket::UnknownSocketError:
+    case BluetoothSocket::SocketError::UnknownSocketError:
         qDebug() << "QBluetoothSocket::UnknownSocketError";
         break;
-    case QBluetoothSocket::RemoteHostClosedError:
+    case BluetoothSocket::SocketError::RemoteHostClosedError:
         qDebug() << "QBluetoothSocket::RemoteHostClosedError";
         break;
-    case QBluetoothSocket::HostNotFoundError:
+    case BluetoothSocket::SocketError::HostNotFoundError:
         qDebug() << "QBluetoothSocket::HostNotFoundError";
         break;
-    case QBluetoothSocket::ServiceNotFoundError:
+    case BluetoothSocket::SocketError::ServiceNotFoundError:
         qDebug() << "QBluetoothSocket::ServiceNotFoundError";
         break;
-    case QBluetoothSocket::NetworkError:
+    case BluetoothSocket::SocketError::NetworkError:
         qDebug() << "QBluetoothSocket::NetworkError";
         break;
-    case QBluetoothSocket::UnsupportedProtocolError:
+    case BluetoothSocket::SocketError::UnsupportedProtocolError:
         qDebug() << "QBluetoothSocket::UnsupportedProtocolError";
         break;
-    case QBluetoothSocket::OperationError:
+    case BluetoothSocket::SocketError::OperationError:
         qDebug() << "QBluetoothSocket::OperationError";
         break;
     }
+
+}
+
+void BluetoothController::socketDisconnected()
+{
+    qDebug() << "Socket disconnected";
+    m_socket->deleteLater();
 }
 

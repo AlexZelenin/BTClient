@@ -3,9 +3,12 @@
 
 #include <QObject>
 #include <QAbstractListModel>
-#include <QBluetoothServiceInfo>
 #include <QList>
 
+#include "globals.h"
+
+// https://github.com/nholthaus/win-bluetooth
+#include <win-bluetooth>
 
 class DeviceModel : public QAbstractListModel
 {
@@ -27,10 +30,10 @@ public:
     QHash<int, QByteArray> roleNames() const;
 
 public slots:
-    void addDevice(const QBluetoothServiceInfo& info);
+    void addDevice(const BluetoothDeviceInfo &info);
 
 private:
-    QList<QBluetoothServiceInfo> m_devices;
+    QList<BluetoothDeviceInfo> m_devices;
 
 };
 
